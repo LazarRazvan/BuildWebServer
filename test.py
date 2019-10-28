@@ -33,6 +33,22 @@ def upload_file():
                                     filename=filename))
     return render_template("index.html")
 
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """
+    This function will be called when user wants to login
+    """
+    error = None
+    print ("login function is called")
+    if request.method == 'POST':
+        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
+            error = 'Invalid Credentials. Please try again.'
+        else:
+            return redirect(url_for('home'))
+            
+    return render_template('login.html', error=error)
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
