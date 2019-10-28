@@ -69,6 +69,14 @@ def build():
         print ("request_form = " + request.form)
     return render_template("build.html");
 
+@app.route('/about', methods=['GET', 'POST'])
+def about():
+    """
+    This function is called when about page is opened.
+    """
+    print ("About function is called")
+    return render_template("about.html")
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
