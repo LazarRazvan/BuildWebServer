@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+	<style type="text/css">
+      body {
+        background: black;
+        color: white;
+      }
+      div.container {
+        max-width: 500px;
+        margin: 100px auto;
+        border: 20px solid white;
+        padding: 10px;
+        text-align: center;
+      }
+      h4 {
+        text-transform: uppercase;
+      }
+    </style>
+    <head>
+    	<title>Upload new File</title>
+    </head>
+    <body>
+    	<img src="/static/images/logo.png" width="200" height="200">
+	    <h1>Upload new File</h1>
+	    <form method=post enctype=multipart/form-data>
+	      <input type=file name=file>
+	      <input type=submit value=Upload>
+	    </form>
+	</body>
+</html>
