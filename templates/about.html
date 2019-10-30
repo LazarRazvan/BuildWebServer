@@ -3,6 +3,12 @@
 <head>
 	<title>About</title>
 	<link rel="stylesheet" type="text/css" href="/static/about.css">
+	<link rel="stylesheet" type="text/css" href="/static/carousel.css" rel="stylesheet" type="text/css" >
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" type="text/css" >
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript" ></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>
+	<script src="/static/slick.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
 	<header>
@@ -15,6 +21,45 @@
 				<li><a href="">Sign In</a></li>
 			</ul>
 		</div>
+
+		<div class="row">
+			<div class="container">
+				<section class="customer-logos slider">
+					<div class="slide"><img src="static/images/grafana.png" width="200" height="200"></div>
+					<div class="slide"><img src="static/images/gcc.png" width="200" height="200"></div>
+					<div class="slide"><img src="static/images/docker.png" width="200" height="200"></div>
+					<div class="slide"><img src="static/images/clang.png" width="200" height="200"></div>
+					<div class="slide"><img src="static/images/influx.png" width="200" height="200"></div>
+					<div class="slide"><img src="static/images/acs.png" width="200" height="200"></div>
+					<div class="slide"><img src="static/images/flask.png" width="200" height="200"></div>
+				</section>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$('.customer-logos').slick({
+					slidesToShow: 6,
+					slidesToScroll: 1,
+					autoplay: true,
+					autoplaySpeed: 1000,
+					arrows: false,
+					dots: false,
+						pauseOnHover: false,
+						responsive: [{
+						breakpoint: 768,
+						settings: {
+							slidesToShow: 4
+						}
+					}, {
+						breakpoint: 520,
+						settings: {
+							slidesToShow: 3
+						}
+					}]
+				});
+			});
+		</script>
 
 		<div class="information">
 			<p>
