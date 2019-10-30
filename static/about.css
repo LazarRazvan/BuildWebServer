@@ -18,6 +18,11 @@ header
 	height: 80px;
 }
 
+.row
+{
+	padding-top: 50px;
+}
+
 .build_logo
 {
 	margin: -35px 40px;
