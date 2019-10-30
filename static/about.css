@@ -62,7 +62,7 @@ header
 {
 	font-family: sans-serif;
 	font-weight: bold;
-	font-size: 20px;
+	font-size: 15px;
 	color: #FFE4C4;
 	text-align: left;
 	padding-left: 20px;
@@ -73,4 +73,22 @@ ul.compilers
 {
 	list-style-type: disc;
 	margin-left: 30px;
+}
+
+a:link {
+  color: #FF6347;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #8A2BE2;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #A9A9A9;
+  background-color: transparent;
+  text-decoration: underline;
 }
