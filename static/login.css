@@ -6,7 +6,7 @@
 
 header
 {
-	background: linear-gradient(to top, #008080, #87CEFA);
+	background-image: url(../static/images/welcome.jpg);
 	height: 100vh;
 	background-size: 100% 100%;
 	background-position: center;
