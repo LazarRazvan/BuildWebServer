@@ -52,6 +52,7 @@ def login():
     error = None
     print ("login function is called")
     if request.method == 'POST':
+        print ("Method is post %s %s" %(request.form['username'], request.form['password']))
         if request.form['username'] != 'admin' or request.form['password'] != 'admin':
             error = 'Invalid Credentials. Please try again.'
         else:
