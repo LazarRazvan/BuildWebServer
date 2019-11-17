@@ -9,3 +9,6 @@ Requirements:
 	- python3
 	- flask
 	- influxdb
+
+Use the following link in order to install and get used with IndluxDB:
+	https://www.influxdata.com/blog/getting-started-python-influxdb/
