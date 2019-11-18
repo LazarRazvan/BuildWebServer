@@ -6,9 +6,19 @@ from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from influxdb import InfluxDBClient
 
+"""
+>>> client.write(['users,hashid=%s name=%s,pass=%s' % ("1231", "21", "521")], {'db':'users'}, protocol='line')
+True
+>>> 
+>>> 
+>>> client.query('SELECT * FROM "users"', database="users")
+ResultSet({'('users', None)': [{'time': '2019-11-18T21:00:39.361545913Z', 'hashid': '1231', 'name': 21, 'pass': 521}]})
+"""
+
 UPLOAD_FOLDER = '/tmp/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 CLIENT = None
+DB_NAME = "users"
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -59,11 +69,20 @@ def login():
     if request.method == 'POST':
         user = request.form.get('username')
         pswd = request.form.get('password')
+        # Create user hash by username and password
+        user_hash = create_hash(user, pswd).hexdigest()
 
         if "email" in request.form:
+            # Sign In : Add data to InfluxDB
             email = request.form.get('email')
+            err = CLIENT.write(['%s,hashid=%s name=%s,pass=%s,email=%s' % (DB_NAME, user_hash, user, pswd, email)], {'db':DB_NAME}, protocol='line')
+            if err:
+                print ("Fail to add user = %s" % (user))
+        else:
+            # Log In : Query InfluxDB to find hash
+            results = CLIENT.query('SELECT "name" FROM "%s"' % (DB_NAME))
+            print ("DB : %s" % (results.raw))
 
-        print (create_hash(user, pswd).hexdigest())
         if request.form['username'] != 'admin' or request.form['password'] != 'admin':
             error = 'Invalid Credentials. Please try again.'
         else:
@@ -110,6 +129,7 @@ def start_database(host_name, port_nr, db_name):
 
     # Check if database is created. If not, create it
     databases_dict = CLIENT.get_list_database()
+    print ("Databases : %s" % (databases_dict))
     databases = [d['name'] for d in databases_dict if 'name' in d]
     if db_name not in databases:
         CLIENT.create_database(db_name)
@@ -128,5 +148,5 @@ def create_hash(username, password):
     return hash
 
 if __name__ == "__main__":
-    start_database('localhost', 8086, 'users')
+    start_database('localhost', 8086, DB_NAME)
     app.run(host="0.0.0.0")
