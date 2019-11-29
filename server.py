@@ -133,8 +133,18 @@ def start_database(host_name, port_nr, db_name):
     databases = [d['name'] for d in databases_dict if 'name' in d]
     if db_name not in databases:
         CLIENT.create_database(db_name)
-
-    CLIENT.switch_database(db_name)
+        CLIENT.switch_database(db_name)
+    else:
+        # Database already exists. Do you want to delete?
+        CLIENT.switch_database(db_name)
+        results = CLIENT.query('SELECT "name" FROM "%s"' % (DB_NAME))
+        print ("Current recordings : %s" % (results.raw))
+        key = input("Do you want to delete current database[y/n]?")
+        if key == 'y':
+            print("Deleting %s database ..." % (DB_NAME))
+            CLIENT.drop_database(DB_NAME)
+            CLIENT.create_database(db_name)
+            CLIENT.switch_database(db_name)
 
 def create_hash(username, password):
     """
