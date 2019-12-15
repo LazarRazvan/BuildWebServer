@@ -1,10 +1,20 @@
 <!doctype html>
 <html>
 <head>
-	<title>About</title>
+  <title>About</title>
   <link rel="stylesheet" type="text/css" href="/static/login.css">
 </head>
 <body>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  {% endwith %}
+  {% block body %}{% endblock %}
 	<header>
 		<div class="navigation">
 			<img src="/static/images/logo.png" class="build_logo">

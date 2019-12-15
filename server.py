@@ -27,27 +27,25 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-if False:
-    @app.route('/', methods=['GET', 'POST'])
-    def upload_file():
-        if request.method == 'POST':
-            # check if the post request has the file part
-            if 'file' not in request.files:
-                flash('No file part')
-                return redirect(request.url)
-            file = request.files['file']
-            # if user does not select file, browser also
-            # submit an empty part without filename
-            if file.filename == '':
-                flash('No selected file')
-                return redirect(request.url)
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                return redirect(url_for('uploaded_file',
-                                        filename=filename))
-        return render_template("index.html")
-
+@app.route('/', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('uploaded_file',
+                                    filename=filename))
+    return render_template("index.html")
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -56,9 +54,8 @@ def welcome():
     This function is used to render welcome page. We don't accept
     POST/GET methods here because we use redirect.
     """
-    return render_template("index.html");
+    return render_template("index.html")
 
-#LOGIN
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """
@@ -75,22 +72,20 @@ def login():
         if "email" in request.form:
             # Sign In : Add data to InfluxDB
             email = request.form.get('email')
-            err = CLIENT.write(['%s,hashid=%s name=%s,pass=%s,email=%s' % (DB_NAME, user_hash, user, pswd, email)], {'db':DB_NAME}, protocol='line')
-            if err:
+            err = CLIENT.write(['%s,hashid=%s name="%s",pass="%s",email="%s"' % (DB_NAME, user_hash, user, pswd, email)], {'db':DB_NAME}, protocol='line')
+            if not err:
                 print ("Fail to add user = %s" % (user))
+                flash ("Fail to Sing in user")
         else:
             # Log In : Query InfluxDB to find hash
-            results = CLIENT.query('SELECT "name" FROM "%s"' % (DB_NAME))
-            print ("DB : %s" % (results.raw))
+            results = list(CLIENT.query('SELECT * FROM "%s" WHERE "hashid" = \'%s\'' % (DB_NAME, user_hash)))
+            if results:
+                # We have an entry for this user
+                return redirect('/build?hash=%s' % (user_hash))
 
-        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
-            error = 'Invalid Credentials. Please try again.'
-        else:
-            return redirect('/build?')
-
+    flash("Fail to login")
     return render_template('login.html', error=error)
 
-#ABOUT
 @app.route('/about', methods=['GET', 'POST'])
 def about():
     """
@@ -105,9 +100,16 @@ def build():
     This function is called after login. It allow users to upload
     files to be compiled and update statistics.
     """
+    print ("Welcome to build page...")
+
+    hash = request.args.get('hash', default = '', type = str)
+    print ("Build page with hash : %s" % hash)
+    # Print the user details by hash
+    results = CLIENT.query('SELECT "name" FROM "%s" WHERE "hashid" = \'%s\'' % (DB_NAME, hash))
+    print ("USER FOR BUILD : %s" % (results.raw))
     if request.method == 'POST':
-        print ("request_form = " + request.form)
-    return render_template("build.html");
+        print ("POST CALLED")
+    return render_template("build.html")
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -159,4 +161,5 @@ def create_hash(username, password):
 
 if __name__ == "__main__":
     start_database('localhost', 8086, DB_NAME)
+    app.secret_key = os.urandom(24)
     app.run(host="0.0.0.0")
