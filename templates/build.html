@@ -3,6 +3,7 @@
 	<style type="text/css">
       body {
         background: black;
+        background-image: url(../static/images/build_wall.jpg);
         color: white;
       }
       div.container {
@@ -20,8 +21,18 @@
     	<title>Upload new File</title>
     </head>
     <body>
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      {% endwith %}
+      {% block body %}{% endblock %}
     	<img src="/static/images/logo.png" width="200" height="200">
-	    <h1>Upload new File</h1>
+	    <h1 style="font-family:verdana; color:darkcyan;">Upload your archive here ...</h1>
 	    <form method=post enctype=multipart/form-data>
 	      <input type=file name=file>
 	      <input type=submit value=Upload>

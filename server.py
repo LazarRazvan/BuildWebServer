@@ -6,17 +6,8 @@ from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from influxdb import InfluxDBClient
 
-"""
->>> client.write(['users,hashid=%s name=%s,pass=%s' % ("1231", "21", "521")], {'db':'users'}, protocol='line')
-True
->>> 
->>> 
->>> client.query('SELECT * FROM "users"', database="users")
-ResultSet({'('users', None)': [{'time': '2019-11-18T21:00:39.361545913Z', 'hashid': '1231', 'name': 21, 'pass': 521}]})
-"""
-
 UPLOAD_FOLDER = '/tmp/uploads'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'py'])
 CLIENT = None
 DB_NAME = "users"
 
@@ -28,7 +19,57 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/', methods=['GET', 'POST'])
-def upload_file():
+def welcome():
+    """
+    This function is used to render welcome page. We don't accept
+    POST/GET methods here because we use redirect.
+    """
+    return render_template("index.html")
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """
+    This function will be called when user wants to login
+    """
+    error = None
+    if request.method == 'POST':
+        user = request.form.get('username')
+        pswd = request.form.get('password')
+        # Create user hash by username and password
+        user_hash = create_hash(user, pswd).hexdigest()
+
+        if "email" in request.form:
+            # Sign In : Add data to InfluxDB
+            email = request.form.get('email')
+            err = CLIENT.write(['%s,hashid=%s name="%s",pass="%s",email="%s"' % (DB_NAME, user_hash, user, pswd, email)], {'db':DB_NAME}, protocol='line')
+            if not err:
+                flash ("Fail to Sing in user")
+        else:
+            # Log In : Query InfluxDB to find hash
+            results = list(CLIENT.query('SELECT * FROM "%s" WHERE "hashid" = \'%s\'' % (DB_NAME, user_hash)))
+            if results:
+                # We have an entry for this user
+                return redirect('/build?hash=%s' % (user_hash))
+            else:
+                flash("Fail to login")
+
+    return render_template('login.html', error=error)
+
+@app.route('/about', methods=['GET', 'POST'])
+def about():
+    """
+    This function is called when about page is opened.
+    """
+    return render_template("about.html")
+
+@app.route('/build', methods=['GET', 'POST'])
+def build():
+    """
+    This function is called after login. It allow users to upload
+    files to be compiled and update statistics.
+    """
+    hashid = request.args.get('hash', default = '', type = str)
+
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -45,70 +86,8 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('uploaded_file',
                                     filename=filename))
-    return render_template("index.html")
-
-
-@app.route('/', methods=['GET', 'POST'])
-def welcome():
-    """
-    This function is used to render welcome page. We don't accept
-    POST/GET methods here because we use redirect.
-    """
-    return render_template("index.html")
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """
-    This function will be called when user wants to login
-    """
-    error = None
-    print ("login function is called")
-    if request.method == 'POST':
-        user = request.form.get('username')
-        pswd = request.form.get('password')
-        # Create user hash by username and password
-        user_hash = create_hash(user, pswd).hexdigest()
-
-        if "email" in request.form:
-            # Sign In : Add data to InfluxDB
-            email = request.form.get('email')
-            err = CLIENT.write(['%s,hashid=%s name="%s",pass="%s",email="%s"' % (DB_NAME, user_hash, user, pswd, email)], {'db':DB_NAME}, protocol='line')
-            if not err:
-                print ("Fail to add user = %s" % (user))
-                flash ("Fail to Sing in user")
         else:
-            # Log In : Query InfluxDB to find hash
-            results = list(CLIENT.query('SELECT * FROM "%s" WHERE "hashid" = \'%s\'' % (DB_NAME, user_hash)))
-            if results:
-                # We have an entry for this user
-                return redirect('/build?hash=%s' % (user_hash))
-
-    flash("Fail to login")
-    return render_template('login.html', error=error)
-
-@app.route('/about', methods=['GET', 'POST'])
-def about():
-    """
-    This function is called when about page is opened.
-    """
-    print ("About function is called")
-    return render_template("about.html")
-
-@app.route('/build', methods=['GET', 'POST'])
-def build():
-    """
-    This function is called after login. It allow users to upload
-    files to be compiled and update statistics.
-    """
-    print ("Welcome to build page...")
-
-    hash = request.args.get('hash', default = '', type = str)
-    print ("Build page with hash : %s" % hash)
-    # Print the user details by hash
-    results = CLIENT.query('SELECT "name" FROM "%s" WHERE "hashid" = \'%s\'' % (DB_NAME, hash))
-    print ("USER FOR BUILD : %s" % (results.raw))
-    if request.method == 'POST':
-        print ("POST CALLED")
+            flash ("File extension not allowed")
     return render_template("build.html")
 
 @app.route('/uploads/<filename>')
