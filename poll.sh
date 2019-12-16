@@ -17,7 +17,8 @@ while true; do
 	files=$(find . -name "*.$EXT")
 	if [ ! -z "$files" ]
 	then
-		echo -e "Files detected:\n========\n$files\n========"
+		current_date_time="`date "+%Y-%m-%d %H:%M:%S"`";
+		echo -e "[$current_date_time]Files detected:\n========\n$files\n========"
 	fi
 	sleep $SLP
 done
