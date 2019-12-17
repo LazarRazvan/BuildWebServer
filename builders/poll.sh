@@ -12,13 +12,15 @@ LOGS="/var/log/poll/logs"
 # Go to directory
 cd $DIR
 
+echo "Directory is changed"
 # Poll for changes
 while true; do
 	files=$(find . -name "*.$EXT")
+	echo "Do while ... "
 	if [ ! -z "$files" ]
 	then
 		current_date_time="`date "+%Y-%m-%d %H:%M:%S"`";
-		echo -e "[$current_date_time]Files detected:\n========\n$files\n========" > $LOGS
+		echo -e "[$current_date_time] Files detected:\n========\n$files\n========\n" >> $LOGS
 	fi
 	sleep $SLP
 done

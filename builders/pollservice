@@ -4,13 +4,26 @@ case "$1" in
 start)
 	# Create log directory
 	mkdir /var/log/poll
-	echo "Mkdir exit with code $?"
-	/usr/local/bin/poll.sh /home/razvan/BuildWebServer py 5 & echo $!>/var/run/poll.pid
+	echo "mkdir /var/log/poll exit with code $?"
+	# Create sources directory
+	mkdir /var/run/poll
+	echo "mkdir /var/run/poll exit with code $?"
+	ls -al /usr/local/bin
+	ps aux
+	nohup /usr/local/bin/poll.sh /var/run/poll py 5
+	echo $!>/var/run/poll.pid
+	ps aux
+	ps aux
+	ps aux
+	ps aux
+	ps aux
+	echo "Error after staring script = $?"
 	;;
 stop)
 	kill $(cat /var/run/poll.pid)
 	rm /var/run/poll.pid
 	rm -rf /var/log/poll
+	rm -rf /var/run/poll
 	;;
 restart)
 	$0 stop
@@ -18,7 +31,7 @@ restart)
 	;;
 status)
 	if [ -e /var/run/poll.pid ]; then
-		pid='cat /var/run/poll.pid'
+		pid=$(cat /var/run/poll.pid)
 		echo "Poll service is running... PID = $pid"
 	else
 		echo "Poll service is not running"
