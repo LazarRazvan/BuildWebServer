@@ -1,0 +1,32 @@
+#!/bin/bash
+
+case "$1" in
+start)
+	# Create log directory
+	mkdir /var/log/poll
+	echo "Mkdir exit with code $?"
+	/usr/local/bin/poll.sh /home/razvan/BuildWebServer py 5 & echo $!>/var/run/poll.pid
+	;;
+stop)
+	kill $(cat /var/run/poll.pid)
+	rm /var/run/poll.pid
+	rm -rf /var/log/poll
+	;;
+restart)
+	$0 stop
+	$0 start
+	;;
+status)
+	if [ -e /var/run/poll.pid ]; then
+		pid='cat /var/run/poll.pid'
+		echo "Poll service is running... PID = $pid"
+	else
+		echo "Poll service is not running"
+		exit 1
+	fi
+	;;
+*)
+	echo "Usage: $0 {start|stop|status|restart}"
+esac
+
+exit 0

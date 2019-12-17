@@ -7,7 +7,7 @@
 DIR=$1
 EXT=$2
 SLP=$3
-LOGS="tmp/pollmsg"
+LOGS="/var/log/poll/logs"
 
 # Go to directory
 cd $DIR
@@ -18,7 +18,7 @@ while true; do
 	if [ ! -z "$files" ]
 	then
 		current_date_time="`date "+%Y-%m-%d %H:%M:%S"`";
-		echo -e "[$current_date_time]Files detected:\n========\n$files\n========"
+		echo -e "[$current_date_time]Files detected:\n========\n$files\n========" > $LOGS
 	fi
 	sleep $SLP
 done
