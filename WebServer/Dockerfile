@@ -10,8 +10,8 @@ RUN python3 -m pip install influxdb
 
 COPY server.py /usr/src/app
 
-COPY templates /usr/src/app/
-COPY static /usr/src/app/
+COPY templates /usr/src/app/templates
+COPY static /usr/src/app/static
 
 EXPOSE 5000
 

@@ -120,7 +120,8 @@ def start_database(host_name, port_nr, db_name):
         CLIENT.switch_database(db_name)
         results = CLIENT.query('SELECT "name" FROM "%s"' % (DB_NAME))
         print ("Current recordings : %s" % (results.raw))
-        key = input("Do you want to delete current database[y/n]?")
+        #key = input("Do you want to delete current database[y/n]?")
+        key = 'y'
         if key == 'y':
             print("Deleting %s database ..." % (DB_NAME))
             CLIENT.drop_database(DB_NAME)
