@@ -7,7 +7,7 @@ from flask import send_from_directory
 from influxdb import InfluxDBClient
 
 UPLOAD_FOLDER = '/tmp/uploads'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'py'])
+ALLOWED_EXTENSIONS = set(['py', 'rar', 'tar'])
 CLIENT = None
 DB_NAME = "users"
 
