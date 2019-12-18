@@ -4,14 +4,11 @@ FROM gcc
 # Copy the polling scrip
 COPY poll.sh /usr/local/bin/
 
-# Copy polling service
-COPY pollservice /etc/init.d/
+# Create logs directory
+RUN mkdir -p /var/log/poll
 
-# Add rights to pollservice
-RUN chmod +x /etc/init.d/pollservice
-
-# Configure service auto-start
-#CMD ["update-rc.d", "pollservice", "defaults"]
+# Create sources directory
+RUN mkdir -p /var/run/poll
 
 # Start polling service
 CMD ["/usr/local/bin/poll.sh", "/var/run/poll", "py", "5", "&"]
