@@ -139,6 +139,6 @@ def create_hash(username, password):
     return hash
 
 if __name__ == "__main__":
-    start_database('localhost', 8086, DB_NAME)
+    start_database('influxdb', 8086, DB_NAME)
     app.secret_key = os.urandom(24)
     app.run(host="0.0.0.0")
