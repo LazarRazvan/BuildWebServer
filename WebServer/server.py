@@ -6,8 +6,8 @@ from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from influxdb import InfluxDBClient
 
-UPLOAD_FOLDER = '/tmp/uploads'
-ALLOWED_EXTENSIONS = set(['py', 'rar', 'tar'])
+UPLOAD_FOLDER = '/var/run/web'
+ALLOWED_EXTENSIONS = set(['zip', 'rar', 'tar'])
 CLIENT = None
 DB_NAME = "users"
 

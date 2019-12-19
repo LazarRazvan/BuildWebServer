@@ -12,11 +12,20 @@ services:
       - "8888:5000"
     networks:
       - webnet
+    volumes:
+      - source-content:/var/run/web
   influxdb:
     image: influxdb
     ports:
       - "8086:8086"
     networks:
       - webnet
+  gcc-builder:
+      image: razvan12/gccbuilder:example1
+      volumes:
+        - source-content:/var/run/poll_src
+
 networks:
   webnet:
+volumes:
+  source-content:

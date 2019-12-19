@@ -35,5 +35,5 @@ make >> $RES_FILE 2>&1
 # Clean and delete directory
 cd ..
 echo "rm -rf $hash"
-rm -rf $hash
+rm -rf $hash $FILE
 exit $err

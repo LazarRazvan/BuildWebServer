@@ -7,6 +7,7 @@ COPY build.sh /usr/local/bin/
 
 # Create logs directory
 RUN mkdir -p /var/log/poll
+RUN touch /var/log/poll/messages
 
 # Create sources directory
 RUN mkdir -p /var/run/poll_src
@@ -15,4 +16,4 @@ RUN mkdir -p /var/run/poll_src
 RUN mkdir -p /var/run/poll_res
 
 # Start polling service
-CMD ["/usr/local/bin/poll.sh", "/var/run/poll_src", "/var/run/poll_res", "/var/log/poll" "10", "&"]
+CMD ["/usr/local/bin/poll.sh", "/var/run/poll_src", "/var/run/poll_res", "/var/log/poll/messages", "zip", "10", "&"]
