@@ -1,0 +1,14 @@
+test.c: In function ‘main’:
+test.c:10:7: error: conflicting types for ‘a’
+  char a[] = "ana are mere";
+       ^
+test.c:9:6: note: previous definition of ‘a’ was here
+  int a = 3, b = 8;
+      ^
+test.c:12:4: warning: assignment makes integer from pointer without a cast [-Wint-conversion]
+  b = a;
+    ^
+test.c:9:13: warning: variable ‘b’ set but not used [-Wunused-but-set-variable]
+  int a = 3, b = 8;
+             ^
+
