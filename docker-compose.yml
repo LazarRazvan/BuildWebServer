@@ -1,7 +1,7 @@
 version: "3"
 services:
   web:
-    image: razvan12/webserver:example4
+    image: webserver
     links:
       - influxdb
     deploy:
@@ -21,11 +21,19 @@ services:
     networks:
       - webnet
   gcc-builder:
-      image: razvan12/gccbuilder:example1
+      image: gccbuilder
       volumes:
         - source-content:/var/run/poll_src
+        - result-content:/var/run/poll_res
+  parser:
+      image: razvan12/parser:example1
+      volumes:
+        - result-content:/var/run/results
+      networks:
+        - webnet
 
 networks:
   webnet:
 volumes:
   source-content:
+  result-content:
