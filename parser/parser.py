@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+import datetime
 from influxdb import InfluxDBClient
 
 WORK_DIR = '/var/run/results'
@@ -8,6 +10,8 @@ LOG_FILE = '/var/log/parser'
 CLIENT = None
 DB_NAME = "results"
 
+# Look for results interval
+POLL_INTERVAL = 5
 def log_to_file(message):
     """
     Add a message to log file
@@ -15,26 +19,29 @@ def log_to_file(message):
     @message: Line to be logged
     """
     with open(LOG_FILE, "a") as log:
-        log.write(message)
+        log.write("[%s]: %s\n" % (datetime.datetime.now(), message))
 
 def poll_results():
     """
     Search for result files and inspect them
     """
-    res_list = os.listdir(WORK_DIR)
-    print ("List is : %s" % res_list)
-    # Get all result files and parse warnings and errors
-    for f_name in res_list:
-        # Check extension
-        print ("File = %s" % f_name)
-        if os.path.splitext(f_name)[1] == '.result':
-            # Hashid identify an user
-            hashid = os.path.splitext(f_name)[0]
-            results = parse_results("%s/%s" % (WORK_DIR, f_name))
-        else:
-            # Log the error
+    while True:
+        res_list = os.listdir(WORK_DIR)
+        # Get all result files and parse warnings and errors
+        for f_name in res_list:
+            # Check extension
+            if os.path.splitext(f_name)[1] == '.result':
+                # Hashid identify an user
+                hashid = os.path.splitext(f_name)[0]
+                results = parse_results("%s/%s" % (WORK_DIR, f_name))
+                log_to_file(results)
+            else:
+                # Log the error
+                log_to_file("[ERROR]: Unknown type %s\n" % f_name)
+
             os.remove("%s/%s" %(WORK_DIR, f_name))
-            log_to_file("[ERROR]: Unknown type %s\n" % f_name)
+        # Wait untill next search (reduce overhead)
+        time.sleep(POLL_INTERVAL)
 
 def parse_results(filename):
     """
@@ -49,10 +56,8 @@ def parse_results(filename):
     results = dict()
     warnings = 00
     errors = 0
-    #print ("parse_results called for file = %s" % filename)
     with open(filename, "r") as file:
         content = file.readlines()
-        #print ("Content %s" % content)
         for line in content:
             if "warning" in line:
                 warnings += 1
@@ -84,7 +89,6 @@ def start_database(host_name, port_nr, db_name):
 
     # Check if database is created. If not, create it
     databases_dict = CLIENT.get_list_database()
-    #print ("Databases : %s" % (databases_dict))
     databases = [d['name'] for d in databases_dict if 'name' in d]
     if db_name not in databases:
         log_to_file("Database %s doesn't exist. Create and switch to database" % db_name)
@@ -96,5 +100,10 @@ def start_database(host_name, port_nr, db_name):
         CLIENT.switch_database(db_name)
 
 if __name__ == "__main__":
-    start_database('influxdb', 8086, DB_NAME)
+    # InfluxDB hostname should be sent as first param
+    if len(sys.argv) - 1 == 0:
+        log_to_file("Trying to start parser without database hostname...")
+        sys.exit(-1)
+
+    start_database(sys.argv[1], 8086, DB_NAME)
     poll_results()
