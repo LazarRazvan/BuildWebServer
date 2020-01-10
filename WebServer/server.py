@@ -6,14 +6,17 @@ from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from influxdb import InfluxDBClient
 
-UPLOAD_FOLDER = '/var/run/web'
+UPLOAD_FOLDER = None
 ALLOWED_EXTENSIONS = set(['zip', 'rar', 'tar'])
 CLIENT = None
 DB_NAME = "users"
+LOG_FILE = '/var/log/webserver'
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Ensure that only allowed files will be uploaded
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -95,6 +98,15 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
 
+def log_to_file(message):
+    """
+    Add a message to log file
+
+    @message: Line to be logged
+    """
+    with open(LOG_FILE, "a") as log:
+        log.write("[%s]: %s\n" % (datetime.datetime.now(), message))
+
 def start_database(host_name, port_nr, db_name):
     """
     Start InfluxDB where authentification data will be stored
@@ -106,20 +118,22 @@ def start_database(host_name, port_nr, db_name):
     CLIENT = InfluxDBClient(host=host_name, port=port_nr)
 
     if not CLIENT:
-        sys.exit("Fail to start InfluxDB on host %s and port %d" % (host_name, port_nr))
+        log_to_file("Fail to start InfluxDB on host %s and port %d" % (host_name, port_nr))
+        sys.exit(-1)
 
     # Check if database is created. If not, create it
     databases_dict = CLIENT.get_list_database()
-    print ("Databases : %s" % (databases_dict))
+    log_to_file("Databases : %s" % (databases_dict))
     databases = [d['name'] for d in databases_dict if 'name' in d]
     if db_name not in databases:
+        log_to_file("Creating database : %s ..." % db_name)
         CLIENT.create_database(db_name)
         CLIENT.switch_database(db_name)
     else:
         # Database already exists. Do you want to delete?
         CLIENT.switch_database(db_name)
         results = CLIENT.query('SELECT "name" FROM "%s"' % (DB_NAME))
-        print ("Current recordings : %s" % (results.raw))
+        log_to_file("Results in database : %s" % (results.raw))
         #key = input("Do you want to delete current database[y/n]?")
         key = 'y'
         if key == 'y':
@@ -140,6 +154,15 @@ def create_hash(username, password):
     return hash
 
 if __name__ == "__main__":
-    start_database('influxdb', 8086, DB_NAME)
+    global UPLOAD_FOLDER
+    # InfluxDB hostname should be sent as first param
+    if len(sys.argv) - 1 != 2:
+        sys.exit(-1)
+
+    DB_HOSTNAME = sys.argv[1]
+    UPLOAD_FOLDER = sys.argv[2]
+    start_database(DB_HOSTNAME, 8086, DB_NAME)
     app.secret_key = os.urandom(24)
+    if UPLOAD_FOLDER is None:
+        sys.exit(-1)
     app.run(host="0.0.0.0")

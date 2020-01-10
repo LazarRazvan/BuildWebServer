@@ -16,4 +16,4 @@ COPY static /usr/src/app/static
 
 EXPOSE 5000
 
-CMD ["python3", "/usr/src/app/server.py"]
+CMD ["python3", "/usr/src/app/server.py", "influxdb", "/var/run/web"]
