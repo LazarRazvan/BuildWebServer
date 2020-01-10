@@ -1,6 +1,7 @@
 import os
 import sys
 import hashlib
+import datetime
 from flask import Flask, flash, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
@@ -14,7 +15,6 @@ LOG_FILE = '/var/log/webserver'
 
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure that only allowed files will be uploaded
 def allowed_file(filename):
@@ -85,8 +85,13 @@ def build():
             flash('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
+            # Rename the archive with the user hashid to be identified in grafana
+            log_to_file("Previous name = %s" % file.filename)
+            file.filename = "%s.zip" % hashid
+            log_to_file("Name after change name = %s" % file.filename)
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            err = file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            log_to_file("Save %s file to %s, err = %s" % (UPLOAD_FOLDER, filename, err))
             return redirect(url_for('uploaded_file',
                                     filename=filename))
         else:
@@ -115,9 +120,12 @@ def start_database(host_name, port_nr, db_name):
     db_name :   database name to store users
     """
     global CLIENT
+    global UPLOAD_FOLDER
+
+    UPLOAD_FOLDER = sys.argv[2]
     CLIENT = InfluxDBClient(host=host_name, port=port_nr)
 
-    if not CLIENT:
+    if not CLIENT or not UPLOAD_FOLDER:
         log_to_file("Fail to start InfluxDB on host %s and port %d" % (host_name, port_nr))
         sys.exit(-1)
 
@@ -154,15 +162,13 @@ def create_hash(username, password):
     return hash
 
 if __name__ == "__main__":
-    global UPLOAD_FOLDER
     # InfluxDB hostname should be sent as first param
     if len(sys.argv) - 1 != 2:
         sys.exit(-1)
 
     DB_HOSTNAME = sys.argv[1]
-    UPLOAD_FOLDER = sys.argv[2]
+
     start_database(DB_HOSTNAME, 8086, DB_NAME)
-    app.secret_key = os.urandom(24)
-    if UPLOAD_FOLDER is None:
-        sys.exit(-1)
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.run(host="0.0.0.0")
