@@ -4,7 +4,6 @@ import time
 import datetime
 from influxdb import InfluxDBClient
 
-WORK_DIR = '/var/run/results'
 LOG_FILE = '/var/log/parser'
 
 CLIENT = None
@@ -21,10 +20,14 @@ def log_to_file(message):
     with open(LOG_FILE, "a") as log:
         log.write("[%s]: %s\n" % (datetime.datetime.now(), message))
 
-def poll_results():
+def poll_results(WORK_DIR=None):
     """
     Search for result files and inspect them
     """
+    if WORK_DIR is None:
+        log_to_file("[ERROR]: Polling directory is not specified")
+        sys.exit(-1)
+
     while True:
         res_list = os.listdir(WORK_DIR)
         # Get all result files and parse warnings and errors
@@ -101,9 +104,11 @@ def start_database(host_name, port_nr, db_name):
 
 if __name__ == "__main__":
     # InfluxDB hostname should be sent as first param
-    if len(sys.argv) - 1 == 0:
-        log_to_file("Trying to start parser without database hostname...")
+    if len(sys.argv) - 1 != 2:
+        log_to_file("Trying to start parser without database hostname and polling dir...")
         sys.exit(-1)
 
-    start_database(sys.argv[1], 8086, DB_NAME)
-    poll_results()
+    DB_HOSTNAME = sys.argv[1]
+    WORK_DIR = sys.argv[2]
+    start_database(DB_HOSTNAME, 8086, DB_NAME)
+    poll_results(WORK_DIR)

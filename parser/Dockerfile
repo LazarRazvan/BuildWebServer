@@ -12,5 +12,5 @@ COPY parser.py /usr/src/app
 # Create polling directory
 RUN mkdir -p /var/run/results
 
-# Run parser (specify influxdb container hostname)
-CMD ["python3", "/usr/src/app/parser.py", "influxdb"]
+# Run parser (specify influxdb container hostname and polling directory)
+CMD ["python3", "/usr/src/app/parser.py", "influxdb", "/var/run/results"]
