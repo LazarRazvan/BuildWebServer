@@ -13,4 +13,4 @@ COPY parser.py /usr/src/app
 RUN mkdir -p /var/run/results
 
 # Run parser (specify influxdb container hostname)
-CMD ["python3", "/usr/src/app/parser.py", "influxdb_server"]
+CMD ["python3", "/usr/src/app/parser.py", "influxdb"]
