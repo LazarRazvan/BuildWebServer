@@ -35,9 +35,19 @@ services:
         - webnet
       depends_on:
         - "influxdb"
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    # Keep dashboards when stop/remove
+    volumes:
+      - grafana:/var/lib/grafana
+    networks:
+      - webnet
 
 networks:
   webnet:
 volumes:
   source-content:
   result-content:
+  grafana:
