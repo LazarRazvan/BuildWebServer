@@ -11,6 +11,7 @@ DB_NAME = "results"
 
 # Look for results interval
 POLL_INTERVAL = 5
+
 def log_to_file(message):
     """
     Add a message to log file
@@ -19,6 +20,17 @@ def log_to_file(message):
     """
     with open(LOG_FILE, "a") as log:
         log.write("[%s]: %s\n" % (datetime.datetime.now(), message))
+
+def add_to_database(results):
+    """
+    Post the build results to InfluxDB
+
+    @results: Dictionary with data to be posted to database
+    """
+
+    err = CLIENT.write(['%s,hashid=%s warnings=%d,errors=%d,status="%s"' % (DB_NAME, results['hashid'], results['warnings'], results['errors'], results['status'])], {'db':DB_NAME}, protocol='line')
+    if not err:
+        log_to_file ("[ERROR] %s fail to post to InfluxDB" % (results['hashid']))
 
 def poll_results(WORK_DIR=None):
     """
@@ -37,7 +49,10 @@ def poll_results(WORK_DIR=None):
                 # Hashid identify an user
                 hashid = os.path.splitext(f_name)[0]
                 results = parse_results("%s/%s" % (WORK_DIR, f_name))
+                results['hashid'] = hashid
                 log_to_file(results)
+                # Post to influxdb
+                add_to_database(results)
             else:
                 # Log the error
                 log_to_file("[ERROR]: Unknown type %s\n" % f_name)
