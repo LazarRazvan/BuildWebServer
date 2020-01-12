@@ -2,8 +2,6 @@ version: "3"
 services:
   web:
     image: webserver
-    links:
-      - influxdb
     deploy:
       replicas: 1
       restart_policy:
