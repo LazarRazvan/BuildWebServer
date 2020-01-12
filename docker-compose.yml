@@ -13,7 +13,8 @@ services:
     networks:
       - webnet
     volumes:
-      - source-content:/var/run/web/gcc
+      - source-content-gcc:/var/run/web/gcc
+      - source-content-clang:/var/run/web/clang
     depends_on:
       - "influxdb"
   influxdb:
@@ -25,8 +26,13 @@ services:
   gcc-builder:
       image: gccbuilder
       volumes:
-        - source-content:/var/run/poll_src
+        - source-content-gcc:/var/run/poll_src
         - result-content:/var/run/poll_res
+  clang-builder:
+    image: clangbuilder
+    volumes:
+      - source-content-clang:/var/run/poll_src
+      - result-content:/var/run/poll_res
   parser:
       image: parser
       volumes:
@@ -48,6 +54,7 @@ services:
 networks:
   webnet:
 volumes:
-  source-content:
+  source-content-gcc:
+  source-content-clang:
   result-content:
   grafana:
