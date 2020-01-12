@@ -3,6 +3,7 @@ import sys
 import hashlib
 import datetime
 from flask import Flask, flash, request, redirect, url_for, render_template
+from prometheus_flask_exporter import PrometheusMetrics
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
 from influxdb import InfluxDBClient
@@ -15,6 +16,8 @@ LOG_FILE = '/var/log/webserver'
 
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
+metrics.info('webserver_info', 'Application info', version='1.0.3')
 
 # Ensure that only allowed files will be uploaded
 def allowed_file(filename):
