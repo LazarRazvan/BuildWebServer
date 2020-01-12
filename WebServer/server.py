@@ -170,8 +170,7 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     DB_HOSTNAME = sys.argv[1]
-
+    app.secret_key = os.urandom(24)
     start_database(DB_HOSTNAME, 8086, DB_NAME)
-    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.run(host="0.0.0.0")
