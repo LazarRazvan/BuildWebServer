@@ -1,7 +1,7 @@
 version: "3"
 services:
   web:
-    image: webserver
+    image: razvan12/webserver:example
     deploy:
       replicas: 1
       restart_policy:
@@ -22,17 +22,17 @@ services:
     networks:
       - webnet
   gcc-builder:
-      image: gccbuilder
+      image: razvan12/gccbuilder:example
       volumes:
         - source-content-gcc:/var/run/poll_src
         - result-content:/var/run/poll_res
   clang-builder:
-    image: clangbuilder
+    image: razvan12/clangbuilder:example
     volumes:
       - source-content-clang:/var/run/poll_src
       - result-content:/var/run/poll_res
   parser:
-      image: parser
+      image: razvan12/parser:example
       volumes:
         - result-content:/var/run/results
       networks:
