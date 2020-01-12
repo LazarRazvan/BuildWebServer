@@ -7,11 +7,12 @@
         color: white;
       }
       div.container {
+        position: relative;
         max-width: 500px;
-        margin: 100px auto;
-        border: 20px solid white;
+        padding-top: 500px;
         padding: 10px;
         text-align: center;
+        color: olive;
       }
       h4 {
         text-transform: uppercase;
@@ -21,21 +22,23 @@
     	<title>Upload new File</title>
     </head>
     <body>
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class=flashes>
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-      {% endwith %}
-      {% block body %}{% endblock %}
     	<img src="/static/images/logo.png" width="200" height="200">
 	    <h1 style="font-family:verdana; color:darkcyan;">Upload your archive here ...</h1>
 	    <form method=post enctype=multipart/form-data>
 	      <input type=file name=file>
 	      <input type=submit value=Upload>
-	    </form>
+      </form>
+      {% block content %}
+      <div class="container">
+        {% for message in get_flashed_messages() %}
+        <div class="alert webserver-messages">
+            {{ message }}
+        </div>
+        <p>Visit <a href="http://localhost:3000">Grafana</a> to see your results</p>
+        {% endfor %}
+
+        {% block page_content %}{% endblock %}
+      </div>
+      {% endblock %}
 	</body>
 </html>

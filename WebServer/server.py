@@ -95,8 +95,7 @@ def build():
             filename = secure_filename(file.filename)
             err = file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             log_to_file("Save %s file to %s, err = %s" % (UPLOAD_FOLDER, filename, err))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
+            flash("Your archive has been uploaded successfully ... ")
         else:
             flash ("File extension not allowed")
     return render_template("build.html")
