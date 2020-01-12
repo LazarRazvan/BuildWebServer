@@ -2,8 +2,12 @@ FROM alpine:edge
 
 RUN apk add --update py3-pip
 
+# Sources for server
 RUN mkdir -p /usr/src/app
-RUN mkdir -p /var/run/web
+# Dir to store archives depending on the compiler
+RUN mkdir -p /var/run/web/gcc
+RUN mkdir -p /var/run/web/clang
+
 COPY requirements.txt /usr/src/app
 
 RUN pip3 install --no-cache-dir -r /usr/src/app/requirements.txt

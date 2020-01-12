@@ -75,12 +75,20 @@ def build():
     files to be compiled and update statistics.
     """
     hashid = request.args.get('hash', default = '', type = str)
+    compiler = None
 
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
+        # check if compiler is specified
+        compiler = request.form.get('compiler')
+        if not compiler:
+            flash("Please specify compiler")
+            return redirect(request.url)
+
+        print("Compiler = %s" % compiler)
         file = request.files['file']
         # if user does not select file, browser also
         # submit an empty part without filename
@@ -93,7 +101,7 @@ def build():
             file.filename = "%s.zip" % hashid
             log_to_file("Name after change name = %s" % file.filename)
             filename = secure_filename(file.filename)
-            err = file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            err = file.save(os.path.join(app.config['UPLOAD_FOLDER'], compiler, filename))
             log_to_file("Save %s file to %s, err = %s" % (UPLOAD_FOLDER, filename, err))
             flash("Your archive has been uploaded successfully ... ")
         else:

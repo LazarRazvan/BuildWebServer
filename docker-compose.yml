@@ -13,7 +13,7 @@ services:
     networks:
       - webnet
     volumes:
-      - source-content:/var/run/web
+      - source-content:/var/run/web/gcc
     depends_on:
       - "influxdb"
   influxdb:

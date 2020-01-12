@@ -17,6 +17,11 @@
       h4 {
         text-transform: uppercase;
       }
+      label {
+        color:black;
+        font-family: Consolas, Baskerville, 'Segoe UI', sans-serif;
+      }
+
     </style>
     <head>
     	<title>Upload new File</title>
@@ -26,7 +31,9 @@
 	    <h1 style="font-family:verdana; color:darkcyan;">Upload your archive here ...</h1>
 	    <form method=post enctype=multipart/form-data>
 	      <input type=file name=file>
-	      <input type=submit value=Upload>
+        <input type=submit value=Upload>
+        <input type="checkbox" name="compiler" value="gcc"><label for="checkbox">GCC</label>
+        <input type="checkbox" name="compiler" value="clang"><label for="checkbox">CLANG</label>
       </form>
       {% block content %}
       <div class="container">
