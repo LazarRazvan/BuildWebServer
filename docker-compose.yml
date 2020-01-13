@@ -3,7 +3,7 @@ services:
   web:
     image: razvan12/webserver:example
     deploy:
-      replicas: 1
+      replicas: 2
       restart_policy:
         condition: on-failure
     ports:
@@ -21,24 +21,37 @@ services:
       - "8086:8086"
     networks:
       - webnet
+    # Always run DB on manager swarm
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
   gcc-builder:
       image: razvan12/gccbuilder:example
       volumes:
         - source-content-gcc:/var/run/poll_src
         - result-content:/var/run/poll_res
+      # If server is down, this is useless
+      depends_on:
+        - "web"
   clang-builder:
     image: razvan12/clangbuilder:example
     volumes:
       - source-content-clang:/var/run/poll_src
       - result-content:/var/run/poll_res
+    # If server is down, this is useless
+    depends_on:
+      - "web"
   parser:
-      image: razvan12/parser:example
-      volumes:
-        - result-content:/var/run/results
-      networks:
-        - webnet
-      depends_on:
-        - "influxdb"
+    image: razvan12/parser:example
+    volumes:
+      - result-content:/var/run/results
+    networks:
+      - webnet
+    depends_on:
+      - "gccbuilder"
+      - "clangbuilder"
   grafana:
     image: grafana/grafana
     ports:
@@ -48,6 +61,11 @@ services:
       - grafana:/var/lib/grafana
     networks:
       - webnet
+    depends_on:
+      - "web"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
 networks:
   webnet:
